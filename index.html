@@ -3,10 +3,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IRC TV PLAYER</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f0a04b'/%3E%3Cpath d='M12 9l11 7-11 7z' fill='%2314202b'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#14202b;--panel:#1b2c3a;--line:#2b4152;--txt:#f3ece0;--mute:#9bb0bd;--acc:#f0a04b;--ok:#5fb8a8;--err:#ee7b6a;
---serif:'Fraunces',Georgia,serif;--sans:'Figtree',system-ui,sans-serif}
+:root{--bg:#0a0b0e;--panel:#111318;--line:#23262d;--txt:#f5f3f0;--mute:#8d939c;--acc:#e8203a;--ok:#5fb8a8;--err:#ff8a7a;
+--serif:'Barlow Condensed','Arial Narrow',sans-serif;--sans:'Figtree',system-ui,sans-serif}
 *{box-sizing:border-box;margin:0}html,body{height:100%}
 body{background:var(--bg);color:var(--txt);font:16px/1.5 var(--sans)}
 button,input{font:inherit;color:inherit}
@@ -17,9 +17,9 @@ button{cursor:pointer;border:0;background:none}
 #home{min-height:100%;display:grid;grid-template-rows:auto 1fr;padding:28px 20px 40px;max-width:980px;margin:auto}
 .brand{display:flex;align-items:center;gap:12px;font:800 22px var(--serif)}
 .logo{width:38px;height:38px;border-radius:10px;background:var(--acc);display:grid;place-items:center}
-.logo svg{width:18px;fill:var(--bg)}
+.logo svg{width:18px;fill:#fff}
 .hero{align-self:center;padding:40px 0}
-h1{font:800 clamp(36px,7vw,64px)/1.05 var(--serif);max-width:12em}
+h1{font:800 clamp(44px,10vw,84px)/.98 var(--serif);max-width:11em}h1 em{color:var(--acc);font-style:normal}
 .lead{color:var(--mute);margin:16px 0 32px;max-width:34em}
 .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .choice{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:left;transition:border-color .15s,transform .15s}
@@ -32,7 +32,7 @@ h1{font:800 clamp(36px,7vw,64px)/1.05 var(--serif);max-width:12em}
 label{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
 input[type=text],input[type=password],input[type=url]{width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg)}
 .row{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
-.btn{background:var(--acc);color:var(--bg);font-weight:600;padding:11px 20px;border-radius:9px}
+.btn{background:var(--acc);color:#fff;font-weight:600;padding:11px 20px;border-radius:9px}
 .btn.ghost{background:none;color:var(--mute);border:1px solid var(--line)}
 .btn:disabled{opacity:.5;cursor:wait}
 .msg{margin-top:12px;font-size:14px;min-height:1.2em}.msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
@@ -53,14 +53,19 @@ aside{padding:16px 10px}aside .brand{font-size:17px;padding:0 8px 14px}aside .lo
 .ch img,.ph{width:42px;height:42px;border-radius:8px;object-fit:contain;background:var(--bg);flex:none}
 .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fav{color:var(--mute);font-size:20px;padding:4px 6px}.fav.on{color:var(--acc)}
-.stage{display:flex;flex-direction:column;min-width:0;background:#0d1620}
+.stage{display:flex;flex-direction:column;min-width:0;background:#07080a}
 .stage video{width:100%;flex:1;min-height:0;background:#000}
 .bar{padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line)}
 .bar .t{font:600 18px var(--serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .status{color:var(--mute);font-size:14px;padding:0 16px 10px}.status.err{color:var(--err)}
 .empty{padding:30px 16px;color:var(--mute);text-align:center}
 .toggle{display:none}
-@media(max-width:900px){
+.page{grid-column:2/4;overflow:auto;padding:32px;background:radial-gradient(900px 420px at 85% -10%,#3a0f17,transparent 65%)}
+.page .lead{max-width:30em}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:32px;max-width:720px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.stat b{display:block;font:700 36px/1 var(--serif)}.stat span{color:var(--mute);font-size:14px}
+#app[data-v=home] .list,#app[data-v=home] .stage{display:none}#app:not([data-v=home]) #dash{display:none}
+.sep{height:1px;background:var(--line);margin:12px 0}
+@media(max-width:900px){#dash{grid-column:1;grid-row:1/3;padding:20px}
  #app{grid-template-columns:1fr;grid-template-rows:auto 1fr}
  .stage{grid-row:1;height:34vh;min-height:220px}
  aside{display:none;position:fixed;inset:0;z-index:5;background:var(--panel)}aside.open{display:block}
@@ -99,9 +104,9 @@ aside{padding:16px 10px}aside .brand{font-size:17px;padding:0 8px 14px}aside .lo
 
 <div id="app" class="hidden">
   <aside id="side"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24"><path d="M6 3l15 9-15 9z"/></svg></div>IRC TV PLAYER</div>
-    <div id="cats"></div><button class="cat" id="out" style="margin-top:14px"><span>Changer de source</span></button></aside>
-  <div class="list"><div class="search"><input id="q" type="text" placeholder="Rechercher une chaîne" aria-label="Rechercher"></div><div id="chs"></div></div>
-  <div class="stage"><video id="v" controls playsinline></video><div class="status" id="st">Choisis une chaîne pour démarrer.</div>
+    <nav id="nav"><button class="cat" data-v="home"><span>Accueil</span></button><button class="cat" data-v="live"><span>Chaînes</span></button><button class="cat" data-v="vod"><span>Films</span></button><button class="cat" data-v="favs"><span>Favoris</span></button><button class="cat" data-v="hist"><span>Historique</span></button></nav><div class="sep"></div><div id="cats"></div><div class="sep"></div><button class="cat" id="out"><span>Changer de source</span></button></aside>
+  <section id="dash" class="page"></section><div class="list"><div class="search"><input id="q" type="text" placeholder="Rechercher une chaîne" aria-label="Rechercher"></div><div id="chs"></div></div>
+  <div class="stage"><video id="v" controls playsinline></video><div class="status" id="st">Choisis une chaîne pour démarrer.</div><div class="status" id="epg" style="padding-top:0"></div>
     <div class="bar"><div class="t" id="tt">Aucune chaîne</div><div class="row" style="margin:0"><button class="btn ghost toggle" id="menu">Catégories</button><button class="btn ghost" id="prev">◀</button><button class="btn ghost" id="next">▶</button><button class="btn ghost" id="fs">Plein écran</button></div></div></div>
 </div>
 
@@ -112,6 +117,7 @@ aside{padding:16px 10px}aside .brand{font-size:17px;padding:0 8px 14px}aside .lo
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
 let channels=[],cat='Toutes',query='',cur=null,hls=null,ts=null,retries=0,srcKey='';
+let LIVE=[],VOD=null,HIST=[],view='home',X=null,emptyMsg='';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const px=u=>'/api/stream?url='+encodeURIComponent(u);
 
@@ -127,7 +133,7 @@ function normUrl(s){s=s.trim();if(!/^[a-z]+:\/\//i.test(s))s='http://'+s;const u
 // ---- Source 1 : Xtream Codes ----
 async function loadXtream(server,user,pass){
   let base;try{base=normUrl(server).origin}catch(e){throw new Error(e.message.includes('http')?e.message:'Adresse du serveur invalide.')}
-  const api=(a)=>`${base}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}${a?'&action='+a:''}`;
+  X={base,user,pass};const api=xapi;
   let info;try{info=JSON.parse(await proxyText(api('')))}catch(e){if(e instanceof SyntaxError)throw new Error("Ce serveur ne répond pas comme un serveur Xtream Codes.");throw e}
   const ui=info&&info.user_info;
   if(!ui||ui.auth===0||ui.auth==='0')throw new Error('Identifiants invalides.');
@@ -135,7 +141,7 @@ async function loadXtream(server,user,pass){
   if(ui.exp_date&&+ui.exp_date*1000<Date.now())throw new Error('Compte expiré.');
   const [cs,ls]=await Promise.all([proxyText(api('get_live_categories')),proxyText(api('get_live_streams'))]);
   const cmap={};(JSON.parse(cs)||[]).forEach(c=>cmap[c.category_id]=c.category_name);
-  const list=(JSON.parse(ls)||[]).map((s,i)=>({id:i,name:s.name||'Sans nom',logo:s.stream_icon||'',group:cmap[s.category_id]||'Sans catégorie',
+  const list=(JSON.parse(ls)||[]).map((s,i)=>({id:i,sid:s.stream_id,name:s.name||'Sans nom',logo:s.stream_icon||'',group:cmap[s.category_id]||'Sans catégorie',
     url:`${base}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${s.stream_id}.m3u8`}));
   if(!list.length)throw new Error("Ce compte ne contient aucune chaîne en direct.");
   return list;
@@ -174,8 +180,7 @@ drop.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
 // ---- Application ----
 const favs=()=>new Set(LS.get('irc_favs',[]));
 const fkey=c=>c.name+'|'+c.url.replace(/\/live\/[^/]+\/[^/]+\//,'/live/');
-function openApp(){show('app');cat='Toutes';query='';$('#q').value='';render();
-  const last=LS.get('irc_last');if(last){const c=channels.find(x=>fkey(x)===last);if(c)select(c,false)}}
+function openApp(){show('app');LIVE=channels;VOD=null;if(srcKey!=='xtream')X=null;HIST=LS.get('irc_saved')?LS.get('irc_hist',[]):[];setView('home')}
 function visible(){const f=favs(),q=query.toLowerCase();
   return channels.filter(c=>(cat==='Toutes'||(cat==='★ Favoris'?f.has(fkey(c)):c.group===cat))&&(!q||c.name.toLowerCase().includes(q)))}
 function render(){
@@ -187,7 +192,7 @@ function render(){
   renderList()}
 function renderList(){
   const f=favs(),v=visible();
-  if(!v.length){$('#chs').innerHTML='<div class="empty">'+(cat==='★ Favoris'?"Aucun favori. Touche l'étoile d'une chaîne pour l'ajouter.":'Aucune chaîne ne correspond à ta recherche.')+'</div>';return}
+  if(!v.length){$('#chs').innerHTML='<div class="empty">'+(emptyMsg||(cat==='★ Favoris'?"Aucun favori. Touche l'étoile d'une chaîne pour l'ajouter.":view==='hist'?'Rien à reprendre pour le moment.':'Aucun résultat pour cette recherche.'))+'</div>';return}
   const part=v.slice(0,400); // affichage progressif pour les très grosses listes
   $('#chs').innerHTML=part.map(c=>`<div class="ch ${cur&&cur.id===c.id?'on':''}" data-i="${c.id}">${c.logo?`<img loading="lazy" src="${esc(c.logo)}" alt="" onerror="this.outerHTML='<div class=ph></div>'">`:'<div class="ph"></div>'}<button class="nm" style="text-align:left">${esc(c.name)}</button><button class="fav ${f.has(fkey(c))?'on':''}" aria-label="Favori">${f.has(fkey(c))?'★':'☆'}</button></div>`).join('')+(v.length>400?`<div class="empty">${v.length-400} autres chaînes : affine la recherche.</div>`:'');
   $$('.ch').forEach(el=>{const c=channels[+el.dataset.i];el.querySelector('.nm').onclick=()=>select(c,true);
@@ -199,14 +204,16 @@ $('#out').onclick=()=>{stop();cur=null;show('home');goChoice()};
 
 // ---- Lecteur ----
 const V=$('#v');
-function stop(){if(hls){hls.destroy();hls=null}if(ts){try{ts.destroy()}catch{}ts=null}V.removeAttribute('src');V.load()}
+function stop(){V.onerror=null;if(hls){hls.destroy();hls=null}if(ts){try{ts.destroy()}catch{}ts=null}V.removeAttribute('src');V.load()}
 function status(t,err){const s=$('#st');s.textContent=t;s.className='status'+(err?' err':'')}
-function select(c,play){cur=c;retries=0;$('#tt').textContent=c.name;LS.set('irc_last',fkey(c));renderList();if(play)start(c)}
+function select(c,play){cur=c;retries=0;$('#tt').textContent=c.name;LS.set('irc_last',fkey(c));$('#epg').textContent='';renderList();
+  if(play){HIST=[{name:c.name,logo:c.logo,url:c.url,group:c.group,sid:c.sid},...HIST.filter(h=>h.url!==c.url)].slice(0,40);if(LS.get('irc_saved'))LS.set('irc_hist',HIST);epg(c);start(c)}}
 function start(c){
   stop();status('Connexion à la chaîne…');const src=px(c.url);
   const isTs=/\.ts(\?|$)/i.test(c.url);
   const fail=(why)=>{if(cur!==c)return;if(retries<3){retries++;status(`Flux interrompu (${why}). Nouvelle tentative ${retries}/3…`,true);setTimeout(()=>cur===c&&start(c),2000*retries)}
     else status("Cette chaîne ne peut pas être lue. Le flux est peut-être hors ligne ou dans un format que le navigateur ne gère pas (MKV, certains codecs).",true)};
+  if(view==='vod'||/\.(mp4|m4v|webm|mkv|avi)(\?|$)/i.test(c.url)){V.src=src;V.onerror=()=>fail('lecture impossible');V.play().catch(()=>{});return}
   if(isTs&&window.mpegts&&mpegts.isSupported()){
     ts=mpegts.createPlayer({type:'mpegts',isLive:true,url:src});ts.attachMediaElement(V);ts.load();
     ts.on(mpegts.Events.ERROR,()=>fail('erreur de lecture'));V.play().then(()=>status('En direct')).catch(()=>{});return}
@@ -226,6 +233,44 @@ V.addEventListener('waiting',()=>cur&&status('Mise en mémoire…'));
 function step(d){const v=visible();if(!v.length)return;const i=v.findIndex(c=>cur&&c.id===cur.id);const n=v[(i+d+v.length)%v.length];select(n,true)}
 $('#prev').onclick=()=>step(-1);$('#next').onclick=()=>step(1);
 $('#fs').onclick=()=>{(V.requestFullscreen||V.webkitEnterFullscreen||V.webkitRequestFullscreen).call(V)};
+
+// ---- Navigation, accueil, films, guide
+function xapi(a){return `${X.base}/player_api.php?username=${encodeURIComponent(X.user)}&password=${encodeURIComponent(X.pass)}${a?'&action='+a:''}`}
+async function setView(v){
+  view=v;emptyMsg='';cat='Toutes';query='';$('#q').value='';$('#app').dataset.v=v;
+  $$('#nav .cat').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  $('#cats').classList.toggle('hidden',!(v==='live'||v==='vod'));
+  $('#side').classList.remove('open');
+  if(v==='home')return renderDash();
+  if(v==='live'||v==='favs'){channels=LIVE;if(v==='favs')cat='★ Favoris'}
+  else if(v==='hist')channels=HIST.map((h,i)=>({...h,id:i}));
+  else if(v==='vod'){
+    if(!X){channels=[];emptyMsg='Les films sont disponibles avec une source Xtream Codes.'}
+    else if(VOD)channels=VOD;
+    else{channels=[];emptyMsg='Chargement des films…';render();
+      try{VOD=await loadVod();if(view==='vod'){channels=VOD;emptyMsg='';render()}}
+      catch(e){emptyMsg='Films indisponibles : '+e.message;if(view==='vod')render()}return}}
+  render()}
+async function loadVod(){
+  const [cs,vs]=await Promise.all([proxyText(xapi('get_vod_categories')),proxyText(xapi('get_vod_streams'))]);
+  const m={};(JSON.parse(cs)||[]).forEach(c=>m[c.category_id]=c.category_name);
+  const l=(JSON.parse(vs)||[]).map((s,i)=>({id:i,name:s.name||'Sans titre',logo:s.stream_icon||'',group:m[s.category_id]||'Sans catégorie',
+    url:`${X.base}/movie/${encodeURIComponent(X.user)}/${encodeURIComponent(X.pass)}/${s.stream_id}.${s.container_extension||'mp4'}`}));
+  if(!l.length)throw new Error("ce compte n'a pas de films.");return l}
+async function epg(c){
+  if(!X||!c.sid)return;
+  try{const j=JSON.parse(await proxyText(xapi('get_short_epg')+'&stream_id='+c.sid+'&limit=2'));const l=j.epg_listings||[];
+    const d=t=>{try{return decodeURIComponent(escape(atob(t)))}catch{return t||''}};
+    if(cur===c&&l.length)$('#epg').textContent='À l\'antenne : '+d(l[0].title)+(l[1]?'  ·  Ensuite : '+d(l[1].title):'')}catch{}}
+function renderDash(){
+  const f=favs(),nf=LIVE.filter(c=>f.has(fkey(c))).length,last=LS.get('irc_last'),lc=LIVE.find(x=>fkey(x)===last);
+  $('#dash').innerHTML=`<button class="btn ghost toggle" id="dm">Menu</button><h1>Tes chaînes. <em>Ta sélection.</em> Ton contrôle.</h1>
+  <p class="lead">Tout ce que ta source met à ta disposition, au même endroit : chaînes en direct, films, favoris et historique.</p>
+  <div class="row"><button class="btn" data-go="live">Explorer les chaînes</button>${lc?`<button class="btn ghost" data-go="resume">Reprendre ${esc(lc.name)}</button>`:''}</div>
+  <div class="stats"><div class="stat"><b>1</b><span>Source active</span></div><div class="stat"><b>${LIVE.length}</b><span>Chaînes</span></div><div class="stat"><b>${nf}</b><span>Favoris</span></div><div class="stat"><b>${HIST.length}</b><span>Dans l'historique</span></div></div>`;
+  $('#dm').onclick=()=>$('#side').classList.add('open');
+  $$('#dash [data-go]').forEach(b=>b.onclick=async()=>{await setView('live');if(b.dataset.go==='resume')select(lc,true)})}
+$$('#nav .cat').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 
 // ---- Reconnexion automatique si l'utilisateur a choisi "se souvenir" ----
 (async()=>{const s=LS.get('irc_saved');if(!s)return;

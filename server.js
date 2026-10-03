@@ -22,17 +22,21 @@ function isPrivate(ip) {
   return v === '::1' || v === '::' || v.startsWith('fc') || v.startsWith('fd') || v.startsWith('fe8') || v.startsWith('fe9') || v.startsWith('fea') || v.startsWith('feb');
 }
 // Le DNS est vérifié au moment de la connexion (anti DNS-rebinding).
+// Node >= 20 appelle lookup avec {all:true} et attend un tableau : on gère les deux cas.
+const ALLOW_PRIVATE = process.env.IRC_TEST_ALLOW_PRIVATE === '1'; // réservé aux tests automatiques
 function safeLookup(host, opts, cb) {
-  dns.lookup(host, { all: false, family: opts && opts.family }, (err, addr, fam) => {
+  if (typeof opts === 'function') { cb = opts; opts = {}; }
+  dns.lookup(host, Object.assign({}, opts, { all: true }), (err, list) => {
     if (err) return cb(err);
-    if (isPrivate(addr)) return cb(new Error('PRIVATE_ADDRESS'));
-    cb(null, addr, fam);
+    if (!ALLOW_PRIVATE && list.some(x => isPrivate(x.address))) return cb(new Error('PRIVATE_ADDRESS'));
+    if (opts && opts.all) return cb(null, list);
+    cb(null, list[0].address, list[0].family);
   });
 }
 function parseTarget(raw) {
   let u; try { u = new URL(raw); } catch { throw new Error('URL invalide'); }
   if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('Seuls http et https sont acceptés');
-  if (net.isIP(u.hostname.replace(/[\[\]]/g, '')) && isPrivate(u.hostname.replace(/[\[\]]/g, ''))) throw new Error('Adresse interne refusée');
+  if (!ALLOW_PRIVATE && net.isIP(u.hostname.replace(/[\[\]]/g, '')) && isPrivate(u.hostname.replace(/[\[\]]/g, ''))) throw new Error('Adresse interne refusée');
   return u;
 }
 
@@ -124,9 +128,36 @@ function handleStream(req, res, u) {
   });
 }
 
+
+// ---- Faux serveur Xtream pour tester (identifiants : test / test) ----
+// Supprimable sans risque : retire ce bloc et l'appel mock(...) plus bas.
+const DEMO = ['https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+  'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8',
+  'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'];
+function mock(req, res, u) {
+  if (u.pathname === '/player_api.php') {
+    const p = u.searchParams, a = p.get('action');
+    if (p.get('username') !== 'test' || p.get('password') !== 'test') return send(res, 200, { user_info: { auth: 0 } }), true;
+    if (a === 'get_live_categories') return send(res, 200, [{ category_id: '1', category_name: 'Démo HD' }, { category_id: '2', category_name: 'Test' }]), true;
+    if (a === 'get_live_streams') return send(res, 200, [
+      { stream_id: 1, name: 'Démo Big Buck Bunny', category_id: '1', stream_icon: '' },
+      { stream_id: 2, name: 'Démo Mire Apple', category_id: '1', stream_icon: '' },
+      { stream_id: 3, name: 'Démo Test 3', category_id: '2', stream_icon: '' }]), true;
+    if (a === 'get_vod_categories') return send(res, 200, [{ category_id: '10', category_name: 'Films démo' }]), true;
+    if (a === 'get_vod_streams') return send(res, 200, [{ stream_id: 1, name: 'Big Buck Bunny (démo)', category_id: '10', stream_icon: '', container_extension: 'mp4' }]), true;
+    if (a === 'get_short_epg') return send(res, 200, { epg_listings: ['Journal démo', 'Film démo'].map(t => ({ title: Buffer.from(t).toString('base64') })) }), true;
+    return send(res, 200, { user_info: { auth: 1, status: 'Active', exp_date: '1893456000' }, server_info: { url: 'demo' } }), true;
+  }
+  const m = u.pathname.match(/^\/live\/test\/test\/(\d+)\.(m3u8|ts)$/);
+  if (/^\/movie\/test\/test\/\d+\.mp4$/.test(u.pathname)) { res.writeHead(302, { Location: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }); res.end(); return true; }
+  if (m) { res.writeHead(302, { Location: DEMO[(+m[1] - 1) % DEMO.length] }); res.end(); return true; }
+  return false;
+}
+
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+  if (mock(req, res, u)) return;
   if (u.pathname.startsWith('/api/')) {
     if (limited(req)) return send(res, 429, { error: 'Trop de requêtes, réessaie dans une minute' });
     if (u.pathname === '/api/fetch' && req.method === 'POST') return handleFetch(req, res);
