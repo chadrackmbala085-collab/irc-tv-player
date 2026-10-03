@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRC TV PLAYER</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f0a04b'/%3E%3Cpath d='M12 9l11 7-11 7z' fill='%2314202b'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14202b;--panel:#1b2c3a;--line:#2b4152;--txt:#f3ece0;--mute:#9bb0bd;--acc:#f0a04b;--ok:#5fb8a8;--err:#ee7b6a;
+--serif:'Fraunces',Georgia,serif;--sans:'Figtree',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font:16px/1.5 var(--sans)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.hidden{display:none!important}
+/* Accueil */
+#home{min-height:100%;display:grid;grid-template-rows:auto 1fr;padding:28px 20px 40px;max-width:980px;margin:auto}
+.brand{display:flex;align-items:center;gap:12px;font:800 22px var(--serif)}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--acc);display:grid;place-items:center}
+.logo svg{width:18px;fill:var(--bg)}
+.hero{align-self:center;padding:40px 0}
+h1{font:800 clamp(36px,7vw,64px)/1.05 var(--serif);max-width:12em}
+.lead{color:var(--mute);margin:16px 0 32px;max-width:34em}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.choice{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:left;transition:border-color .15s,transform .15s}
+.choice:hover{border-color:var(--acc);transform:translateY(-2px)}
+.choice b{display:block;font:600 19px var(--serif);margin-bottom:4px}
+.choice span{color:var(--mute);font-size:14px}
+/* Formulaires */
+.form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:520px;margin-top:8px}
+.form h2{font:600 24px var(--serif);margin-bottom:14px}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+input[type=text],input[type=password],input[type=url]{width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg)}
+.row{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.btn{background:var(--acc);color:var(--bg);font-weight:600;padding:11px 20px;border-radius:9px}
+.btn.ghost{background:none;color:var(--mute);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:wait}
+.msg{margin-top:12px;font-size:14px;min-height:1.2em}.msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;color:var(--mute);cursor:pointer}
+.drop.over{border-color:var(--acc);color:var(--txt)}
+.check{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--mute);font-size:14px}
+/* Application */
+#app{height:100%;display:grid;grid-template-columns:230px 340px 1fr;grid-template-rows:100%}
+aside,.list{background:var(--panel);overflow:auto;border-right:1px solid var(--line)}
+aside{padding:16px 10px}aside .brand{font-size:17px;padding:0 8px 14px}aside .logo{width:30px;height:30px}
+.cat{display:flex;justify-content:space-between;width:100%;text-align:left;padding:9px 10px;border-radius:8px;color:var(--mute);font-size:15px;gap:8px}
+.cat span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat:hover{background:var(--bg)}.cat.on{background:var(--bg);color:var(--acc)}
+.list{display:flex;flex-direction:column}
+.search{padding:12px;position:sticky;top:0;background:var(--panel);z-index:2;border-bottom:1px solid var(--line)}
+.ch{display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.ch:hover,.ch.on{background:var(--bg)}.ch.on .nm{color:var(--acc)}
+.ch img,.ph{width:42px;height:42px;border-radius:8px;object-fit:contain;background:var(--bg);flex:none}
+.nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fav{color:var(--mute);font-size:20px;padding:4px 6px}.fav.on{color:var(--acc)}
+.stage{display:flex;flex-direction:column;min-width:0;background:#0d1620}
+.stage video{width:100%;flex:1;min-height:0;background:#000}
+.bar{padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line)}
+.bar .t{font:600 18px var(--serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{color:var(--mute);font-size:14px;padding:0 16px 10px}.status.err{color:var(--err)}
+.empty{padding:30px 16px;color:var(--mute);text-align:center}
+.toggle{display:none}
+@media(max-width:900px){
+ #app{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+ .stage{grid-row:1;height:34vh;min-height:220px}
+ aside{display:none;position:fixed;inset:0;z-index:5;background:var(--panel)}aside.open{display:block}
+ .list{grid-row:2;border:0}.toggle{display:inline-block}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body>
+<main id="home">
+  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24"><path d="M6 3l15 9-15 9z"/></svg></div>IRC TV PLAYER</div>
+  <section class="hero" id="heroBox">
+    <h1>Ta télé en direct, depuis ta propre source.</h1>
+    <p class="lead">Connecte ton abonnement Xtream Codes ou ta playlist M3U. IRC TV PLAYER ne fournit aucune chaîne : tu apportes la tienne.</p>
+    <div class="choices">
+      <button class="choice" data-src="xtream"><b>Xtream Codes</b><span>Serveur, identifiant et mot de passe</span></button>
+      <button class="choice" data-src="m3u"><b>Lien M3U</b><span>Adresse http ou https de ta playlist</span></button>
+      <button class="choice" data-src="file"><b>Fichier M3U</b><span>Importe un fichier .m3u ou .m3u8</span></button>
+    </div>
+  </section>
+  <section class="hero hidden" id="formBox">
+    <form class="form" id="fx" data-f="xtream" autocomplete="off"><h2>Connexion Xtream Codes</h2>
+      <label for="xs">Adresse du serveur</label><input id="xs" type="text" placeholder="http://exemple.com:8080" required>
+      <label for="xu">Nom d'utilisateur</label><input id="xu" type="text" required>
+      <label for="xp">Mot de passe</label><input id="xp" type="password" required>
+      <label class="check"><input id="xr" type="checkbox"> Se souvenir de moi sur cet appareil</label>
+      <div class="row"><button class="btn" type="submit">Se connecter</button><button class="btn ghost back" type="button">Retour</button></div><p class="msg"></p></form>
+    <form class="form" id="fm" data-f="m3u"><h2>Playlist M3U par lien</h2>
+      <label for="mu">Adresse de la playlist</label><input id="mu" type="text" placeholder="http://exemple.com/get.php?..." required>
+      <label class="check"><input id="mr" type="checkbox"> Se souvenir de moi sur cet appareil</label>
+      <div class="row"><button class="btn" type="submit">Charger la playlist</button><button class="btn ghost back" type="button">Retour</button></div><p class="msg"></p></form>
+    <form class="form" id="ff" data-f="file"><h2>Fichier M3U</h2>
+      <div class="drop" id="drop" tabindex="0">Glisse ton fichier ici ou clique pour le choisir<br><small>.m3u, .m3u8</small></div>
+      <input id="fi" type="file" accept=".m3u,.m3u8,audio/x-mpegurl,application/vnd.apple.mpegurl,text/plain" class="hidden">
+      <div class="row"><button class="btn ghost back" type="button">Retour</button></div><p class="msg"></p></form>
+  </section>
+</main>
+
+<div id="app" class="hidden">
+  <aside id="side"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24"><path d="M6 3l15 9-15 9z"/></svg></div>IRC TV PLAYER</div>
+    <div id="cats"></div><button class="cat" id="out" style="margin-top:14px"><span>Changer de source</span></button></aside>
+  <div class="list"><div class="search"><input id="q" type="text" placeholder="Rechercher une chaîne" aria-label="Rechercher"></div><div id="chs"></div></div>
+  <div class="stage"><video id="v" controls playsinline></video><div class="status" id="st">Choisis une chaîne pour démarrer.</div>
+    <div class="bar"><div class="t" id="tt">Aucune chaîne</div><div class="row" style="margin:0"><button class="btn ghost toggle" id="menu">Catégories</button><button class="btn ghost" id="prev">◀</button><button class="btn ghost" id="next">▶</button><button class="btn ghost" id="fs">Plein écran</button></div></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.js"></script>
+<script src="parser.js"></script>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
+let channels=[],cat='Toutes',query='',cur=null,hls=null,ts=null,retries=0,srcKey='';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const px=u=>'/api/stream?url='+encodeURIComponent(u);
+
+// ---- Réseau via proxy ----
+async function proxyText(url){
+  let r; try{r=await fetch('/api/fetch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})})}
+  catch{throw new Error('Le serveur IRC TV PLAYER est injoignable.')}
+  if(!r.ok){let m='Erreur '+r.status;try{m=(await r.json()).error||m}catch{}throw new Error(m)}
+  return r.text();
+}
+function normUrl(s){s=s.trim();if(!/^[a-z]+:\/\//i.test(s))s='http://'+s;const u=new URL(s);if(!/^https?:$/.test(u.protocol))throw new Error('Seuls http et https sont acceptés.');return u}
+
+// ---- Source 1 : Xtream Codes ----
+async function loadXtream(server,user,pass){
+  let base;try{base=normUrl(server).origin}catch(e){throw new Error(e.message.includes('http')?e.message:'Adresse du serveur invalide.')}
+  const api=(a)=>`${base}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}${a?'&action='+a:''}`;
+  let info;try{info=JSON.parse(await proxyText(api('')))}catch(e){if(e instanceof SyntaxError)throw new Error("Ce serveur ne répond pas comme un serveur Xtream Codes.");throw e}
+  const ui=info&&info.user_info;
+  if(!ui||ui.auth===0||ui.auth==='0')throw new Error('Identifiants invalides.');
+  if(ui.status&&ui.status!=='Active')throw new Error('Compte '+(ui.status==='Expired'?'expiré':ui.status.toLowerCase())+'.');
+  if(ui.exp_date&&+ui.exp_date*1000<Date.now())throw new Error('Compte expiré.');
+  const [cs,ls]=await Promise.all([proxyText(api('get_live_categories')),proxyText(api('get_live_streams'))]);
+  const cmap={};(JSON.parse(cs)||[]).forEach(c=>cmap[c.category_id]=c.category_name);
+  const list=(JSON.parse(ls)||[]).map((s,i)=>({id:i,name:s.name||'Sans nom',logo:s.stream_icon||'',group:cmap[s.category_id]||'Sans catégorie',
+    url:`${base}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${s.stream_id}.m3u8`}));
+  if(!list.length)throw new Error("Ce compte ne contient aucune chaîne en direct.");
+  return list;
+}
+// ---- Écrans ----
+function show(id){['home','app'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==id))}
+function goForm(src){const f={xtream:'#fx',m3u:'#fm',file:'#ff'}[src];$('#heroBox').classList.add('hidden');$('#formBox').classList.remove('hidden');$$('.form').forEach(x=>x.classList.add('hidden'));$(f).classList.remove('hidden');$(f).querySelector('input')?.focus()}
+function goChoice(){$('#formBox').classList.add('hidden');$('#heroBox').classList.remove('hidden')}
+function setMsg(f,t,c){const m=f.querySelector('.msg');m.textContent=t||'';m.className='msg '+(c||'')}
+$$('.choice').forEach(b=>b.onclick=()=>goForm(b.dataset.src));
+$$('.back').forEach(b=>b.onclick=goChoice);
+
+async function guarded(form,btn,fn){
+  const b=form.querySelector('button[type=submit]');b&&(b.disabled=true);setMsg(form,'Chargement des chaînes…');
+  try{channels=await fn();setMsg(form,channels.length+' chaînes chargées','ok');openApp()}
+  catch(e){setMsg(form,e.message,'err')}finally{b&&(b.disabled=false)}
+}
+$('#fx').onsubmit=e=>{e.preventDefault();const s=$('#xs').value,u=$('#xu').value.trim(),p=$('#xp').value;
+  guarded(e.target,0,async()=>{const l=await loadXtream(s,u,p);srcKey='xtream';
+    if($('#xr').checked)LS.set('irc_saved',{type:'xtream',s,u,p});else LS.del('irc_saved');return l})};
+$('#fm').onsubmit=e=>{e.preventDefault();const raw=$('#mu').value;
+  guarded(e.target,0,async()=>{const u=normUrl(raw).href;const l=parseM3U(await proxyText(u));srcKey='m3u';
+    if($('#mr').checked)LS.set('irc_saved',{type:'m3u',u:raw});else LS.del('irc_saved');return l})};
+// Source 3 : lecture locale
+function readFile(file){const f=$('#ff');
+  if(!file)return;if(!/\.(m3u8?|txt)$/i.test(file.name)&&file.type&&!/mpegurl|text/.test(file.type))return setMsg(f,'Format non pris en charge. Choisis un fichier .m3u ou .m3u8.','err');
+  const r=new FileReader();r.onerror=()=>setMsg(f,'Impossible de lire ce fichier.','err');
+  r.onload=()=>{try{channels=parseM3U(r.result);srcKey='file';LS.del('irc_saved');setMsg(f,channels.length+' chaînes chargées','ok');openApp()}catch(e){setMsg(f,e.message,'err')}};
+  r.readAsText(file)}
+const drop=$('#drop');drop.onclick=()=>$('#fi').click();drop.onkeydown=e=>e.key==='Enter'&&$('#fi').click();
+$('#fi').onchange=e=>{readFile(e.target.files[0]);e.target.value=''};
+['dragover','dragenter'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
+
+// ---- Application ----
+const favs=()=>new Set(LS.get('irc_favs',[]));
+const fkey=c=>c.name+'|'+c.url.replace(/\/live\/[^/]+\/[^/]+\//,'/live/');
+function openApp(){show('app');cat='Toutes';query='';$('#q').value='';render();
+  const last=LS.get('irc_last');if(last){const c=channels.find(x=>fkey(x)===last);if(c)select(c,false)}}
+function visible(){const f=favs(),q=query.toLowerCase();
+  return channels.filter(c=>(cat==='Toutes'||(cat==='★ Favoris'?f.has(fkey(c)):c.group===cat))&&(!q||c.name.toLowerCase().includes(q)))}
+function render(){
+  const f=favs(),g={};channels.forEach(c=>g[c.group]=(g[c.group]||0)+1);
+  const nFav=channels.filter(c=>f.has(fkey(c))).length;
+  const items=[['Toutes',channels.length],['★ Favoris',nFav],...Object.entries(g)];
+  $('#cats').innerHTML=items.map(([n,k])=>`<button class="cat ${n===cat?'on':''}" data-c="${esc(n)}"><span>${esc(n)}</span><span>${k}</span></button>`).join('');
+  $$('.cat[data-c]').forEach(b=>b.onclick=()=>{cat=b.dataset.c;$('#side').classList.remove('open');render()});
+  renderList()}
+function renderList(){
+  const f=favs(),v=visible();
+  if(!v.length){$('#chs').innerHTML='<div class="empty">'+(cat==='★ Favoris'?"Aucun favori. Touche l'étoile d'une chaîne pour l'ajouter.":'Aucune chaîne ne correspond à ta recherche.')+'</div>';return}
+  const part=v.slice(0,400); // affichage progressif pour les très grosses listes
+  $('#chs').innerHTML=part.map(c=>`<div class="ch ${cur&&cur.id===c.id?'on':''}" data-i="${c.id}">${c.logo?`<img loading="lazy" src="${esc(c.logo)}" alt="" onerror="this.outerHTML='<div class=ph></div>'">`:'<div class="ph"></div>'}<button class="nm" style="text-align:left">${esc(c.name)}</button><button class="fav ${f.has(fkey(c))?'on':''}" aria-label="Favori">${f.has(fkey(c))?'★':'☆'}</button></div>`).join('')+(v.length>400?`<div class="empty">${v.length-400} autres chaînes : affine la recherche.</div>`:'');
+  $$('.ch').forEach(el=>{const c=channels[+el.dataset.i];el.querySelector('.nm').onclick=()=>select(c,true);
+    el.querySelector('.fav').onclick=()=>{const s=favs(),k=fkey(c);s.has(k)?s.delete(k):s.add(k);LS.set('irc_favs',[...s]);render()}})}
+$('#q').oninput=e=>{query=e.target.value;renderList()};
+$('#menu').onclick=()=>$('#side').classList.add('open');
+$('#side').addEventListener('click',e=>{if(e.target.id==='side')e.target.classList.remove('open')});
+$('#out').onclick=()=>{stop();cur=null;show('home');goChoice()};
+
+// ---- Lecteur ----
+const V=$('#v');
+function stop(){if(hls){hls.destroy();hls=null}if(ts){try{ts.destroy()}catch{}ts=null}V.removeAttribute('src');V.load()}
+function status(t,err){const s=$('#st');s.textContent=t;s.className='status'+(err?' err':'')}
+function select(c,play){cur=c;retries=0;$('#tt').textContent=c.name;LS.set('irc_last',fkey(c));renderList();if(play)start(c)}
+function start(c){
+  stop();status('Connexion à la chaîne…');const src=px(c.url);
+  const isTs=/\.ts(\?|$)/i.test(c.url);
+  const fail=(why)=>{if(cur!==c)return;if(retries<3){retries++;status(`Flux interrompu (${why}). Nouvelle tentative ${retries}/3…`,true);setTimeout(()=>cur===c&&start(c),2000*retries)}
+    else status("Cette chaîne ne peut pas être lue. Le flux est peut-être hors ligne ou dans un format que le navigateur ne gère pas (MKV, certains codecs).",true)};
+  if(isTs&&window.mpegts&&mpegts.isSupported()){
+    ts=mpegts.createPlayer({type:'mpegts',isLive:true,url:src});ts.attachMediaElement(V);ts.load();
+    ts.on(mpegts.Events.ERROR,()=>fail('erreur de lecture'));V.play().then(()=>status('En direct')).catch(()=>{});return}
+  if(window.Hls&&Hls.isSupported()){
+    hls=new Hls({lowLatencyMode:false,manifestLoadingMaxRetry:2});hls.loadSource(src);hls.attachMedia(V);
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>V.play().catch(()=>{}));
+    hls.on(Hls.Events.ERROR,(_,d)=>{if(!d.fatal)return;
+      if(d.type===Hls.ErrorTypes.MEDIA_ERROR&&retries===0){retries++;hls.recoverMediaError();return}
+      // Certains serveurs Xtream renvoient du MPEG-TS brut : on bascule sur mpegts.js
+      if(d.details==='manifestParsingError'&&window.mpegts&&mpegts.isSupported()){stop();ts=mpegts.createPlayer({type:'mpegts',isLive:true,url:src});ts.attachMediaElement(V);ts.load();ts.on(mpegts.Events.ERROR,()=>fail('format non reconnu'));V.play().catch(()=>{});return}
+      fail(d.details||'erreur')});
+  }else if(V.canPlayType('application/vnd.apple.mpegurl')){V.src=src;V.play().catch(()=>{})}
+  else return status("Ton navigateur ne peut pas lire ce type de flux.",true);
+}
+V.addEventListener('playing',()=>{retries=0;status('En direct')});
+V.addEventListener('waiting',()=>cur&&status('Mise en mémoire…'));
+function step(d){const v=visible();if(!v.length)return;const i=v.findIndex(c=>cur&&c.id===cur.id);const n=v[(i+d+v.length)%v.length];select(n,true)}
+$('#prev').onclick=()=>step(-1);$('#next').onclick=()=>step(1);
+$('#fs').onclick=()=>{(V.requestFullscreen||V.webkitEnterFullscreen||V.webkitRequestFullscreen).call(V)};
+
+// ---- Reconnexion automatique si l'utilisateur a choisi "se souvenir" ----
+(async()=>{const s=LS.get('irc_saved');if(!s)return;
+  if(s.type==='xtream'){$('#xs').value=s.s;$('#xu').value=s.u;$('#xp').value=s.p;$('#xr').checked=true}
+  else{$('#mu').value=s.u;$('#mr').checked=true}})();
+</script></body></html>
